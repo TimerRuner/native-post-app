@@ -1,4 +1,5 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useCallback } from "react"
+import { useDispatch, useSelector } from "react-redux"
 import {
     View,
     Text,
@@ -8,19 +9,39 @@ import {
     ScrollView,
     Alert,
 } from "react-native"
-import { Item, HeaderButtons } from "react-navigation-header-buttons"
-import { AppHeaderIcon } from "../components/AppHeaderIcon"
-import { DATA } from "../data"
+
 import { THEME } from "../theme"
+import { removePost, toggleBooked } from "../store/actions/post"
 
-export const PostScreen = ({ route: { params } }) => {
-    const postId = params.postId
+export const PostScreen = ({ navigation, route }) => {
+    const dispatch = useDispatch()
 
-    const post = DATA.find((p) => p.id === postId)
+    const postId = route.params.postId
 
-    // useEffect(() => {
-    //   navigation.setParams({ booked: post.booked })
-    // }, [])
+    const post = useSelector((state) =>
+        state.post.allPosts.find((p) => p.id === postId)
+    )
+
+    //? динамічно передаємо значення стейту в нашу сторінку
+    const booked = useSelector((state) =>
+        state.post.bookedPosts.some((post) => post.id === postId)
+    )
+
+    useEffect(() => {
+        navigation.navigate("Post", { ...route.params, booked })
+    }, [booked])
+
+    //! для того щоб
+    //? щоб useEffect не одразу викликав діспатч, ми переміщаємо його в нову функцію
+    //? Для того, щоб не зациклювати програму ми нашу функцію поміщаємо в useCallback який спрацьовуватиме лише при зміні вказаних параметрів і перевикликатиме нашу функцію із оновленими параметрами (якщо цю функцію не огорнути в хук і передати в вигляді залежності useEffect - програма зациклиться, так як useEffect викликається на старті 2 рази)
+    const toggleHandler = useCallback(() => {
+        dispatch(toggleBooked(post))
+    }, [dispatch, post])
+
+    //? при виклику toggleNavigation - він змінюватиметься і відповідно спрацьовуватиме useEffect, що викличе зациклення, щоб цього уникнути ми огонемо функцію в useCallback, що не дозволятиме їй зайвий раз змінбватись при рендері і трігирити useEffect, викличиться 1 раз
+    useEffect(() => {
+        navigation.navigate("Post", { ...route.params, toggleHandler })
+    }, [toggleHandler])
 
     const removeHandler = () => {
         Alert.alert(
@@ -31,10 +52,21 @@ export const PostScreen = ({ route: { params } }) => {
                     text: "Отменить",
                     style: "cancel",
                 },
-                { text: "Удалить", style: "destructive", onPress: () => {} },
+                {
+                    text: "Удалить",
+                    style: "destructive",
+                    onPress: () => {
+                        navigation.navigate("Main")
+                        dispatch(removePost(postId))
+                    },
+                },
             ],
             { cancelable: false }
         )
+    }
+
+    if (!post) {
+        return null
     }
 
     return (

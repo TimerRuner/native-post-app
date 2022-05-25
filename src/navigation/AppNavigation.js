@@ -43,7 +43,7 @@ const PostNavigator = () => {
                             <Item
                                 title="Take photo"
                                 iconName="ios-camera"
-                                onPress={() => console.log("Press photo")}
+                                onPress={() => navigation.navigate("Create")}
                             />
                         </HeaderButtons>
                     ),
@@ -74,7 +74,7 @@ const PostNavigator = () => {
                                         ? "ios-star"
                                         : "ios-star-outline"
                                 }
-                                onPress={() => console.log("Press photo")}
+                                onPress={route.params.toggleHandler}
                             />
                         </HeaderButtons>
                     ),
@@ -130,13 +130,81 @@ const BookedNavigator = () => {
                                         ? "ios-star"
                                         : "ios-star-outline"
                                 }
-                                onPress={() => console.log("Press photo")}
+                                onPress={route.params.toggleHandler}
                             />
                         </HeaderButtons>
                     ),
                 })}
             />
         </StackBooked.Navigator>
+    )
+}
+
+const StackAbout = createStackNavigator()
+
+const AboutNavigator = () => {
+    return (
+        <StackAbout.Navigator
+            screenOptions={{
+                headerStyle: {
+                    backgroundColor:
+                        Platform.OS === "android" ? THEME.MAIN_COLOR : "#fff",
+                },
+                headerTintColor:
+                    Platform.OS === "android" ? "#fff" : THEME.MAIN_COLOR,
+            }}
+        >
+            <StackAbout.Screen
+                name="About"
+                component={AboutScreen}
+                options={({ route, navigation }) => ({
+                    headerTitle: "About",
+                    headerLeft: () => (
+                        <HeaderButtons HeaderButtonComponent={AppHeaderIcon}>
+                            <Item
+                                title="Toggle Drawer"
+                                iconName="ios-menu"
+                                onPress={() => navigation.toggleDrawer()}
+                            />
+                        </HeaderButtons>
+                    ),
+                })}
+            />
+        </StackAbout.Navigator>
+    )
+}
+
+const StackCreate = createStackNavigator()
+
+const CreateNavigator = () => {
+    return (
+        <StackCreate.Navigator
+            screenOptions={{
+                headerStyle: {
+                    backgroundColor:
+                        Platform.OS === "android" ? THEME.MAIN_COLOR : "#fff",
+                },
+                headerTintColor:
+                    Platform.OS === "android" ? "#fff" : THEME.MAIN_COLOR,
+            }}
+        >
+            <StackCreate.Screen
+                name="Create"
+                component={CreateScreen}
+                options={({ route, navigation }) => ({
+                    headerTitle: "Create",
+                    headerLeft: () => (
+                        <HeaderButtons HeaderButtonComponent={AppHeaderIcon}>
+                            <Item
+                                title="Toggle Drawer"
+                                iconName="ios-menu"
+                                onPress={() => navigation.toggleDrawer()}
+                            />
+                        </HeaderButtons>
+                    ),
+                })}
+            />
+        </StackCreate.Navigator>
     )
 }
 
@@ -238,11 +306,31 @@ const MyStack = () => {
         <NavigationContainer>
             <Drawer.Navigator
                 initialRouteName="PostTabs"
-                screenOptions={{ headerShown: false }}
+                screenOptions={{
+                    headerShown: false,
+                    drawerActiveTintColor: THEME.MAIN_COLOR,
+                    drawerLabelStyle: {
+                        fontFamily: "open-bold",
+                    },
+                }}
             >
-                <Drawer.Screen name="PostTabs" component={Tab} />
-                <Drawer.Screen name="About" component={AboutScreen} />
-                <Drawer.Screen name="Create" component={CreateScreen} />
+                <Drawer.Screen
+                    name="PostTabs"
+                    component={Tab}
+                    options={{
+                        drawerLabel: "Main",
+                    }}
+                />
+                <Drawer.Screen
+                    name="About"
+                    component={AboutNavigator}
+                    options={{ drawerLabel: "About App" }}
+                />
+                <Drawer.Screen
+                    name="Create"
+                    component={CreateNavigator}
+                    options={{ drawerLabel: "New Post" }}
+                />
             </Drawer.Navigator>
         </NavigationContainer>
     )
